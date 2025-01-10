@@ -30,10 +30,10 @@ public class CatalogConnector {
         this.configuration = configuration;
     }
 
-    @CircuitBreaker(name = "api-catalog", fallbackMethod = "fallbackGetCity")
-
-
+    @CircuitBreaker(name = "api-catalog")
     public CityDTO getCity(String code){
+
+        System.out.println("Calling to api-catalog");
 
         HostConfiguration hostConfiguration = configuration.getHosts().get(HOST);
         EndpointConfiguration endpointConfiguration = hostConfiguration.getEndpoints().get(ENDPOINT);
