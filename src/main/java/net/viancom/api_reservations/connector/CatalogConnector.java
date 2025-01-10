@@ -1,9 +1,9 @@
 package net.viancom.api_reservations.connector;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import io.netty.resolver.DefaultAddressResolverGroup;
 import net.viancom.api_reservations.connector.configuration.EndpointConfiguration;
 import net.viancom.api_reservations.connector.configuration.HostConfiguration;
 import net.viancom.api_reservations.connector.configuration.HttpConnectorConfiguration;
@@ -29,6 +29,9 @@ public class CatalogConnector {
     public CatalogConnector(HttpConnectorConfiguration configuration) {
         this.configuration = configuration;
     }
+
+    @CircuitBreaker(name = "api-catalog", fallbackMethod = "fallbackGetCity")
+
 
     public CityDTO getCity(String code){
 

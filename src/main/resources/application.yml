@@ -41,3 +41,24 @@ http-connector:
           readTimeout: 2000
           writeTimeout: 2000
           connectionTimeout: 2000
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        sliding-window-size: 5
+        sliding-window-type: count_based
+
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 1
+
+        register-health-indicator: false
+        record-exceptions:
+          - io-netty.handler.timeout.ReadTimeoutException
+          - java.lang.RuntimeException
+
+    instances:
+      api-catalog:
+        base-config: default
