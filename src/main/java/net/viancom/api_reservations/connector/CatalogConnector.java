@@ -1,6 +1,8 @@
 package net.viancom.api_reservations.connector;
 
 import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.resolver.DefaultAddressResolverGroup;
 import net.viancom.api_reservations.connector.configuration.EndpointConfiguration;
 import net.viancom.api_reservations.connector.configuration.HostConfiguration;
@@ -13,6 +15,8 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class CatalogConnector {
@@ -33,13 +37,16 @@ public class CatalogConnector {
 
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(endpointConfiguration.getConnectionTimeout()))
-                .
+                .doOnConnected(conn->conn
+                        .addHandler(new ReadTimeoutHandler(endpointConfiguration.getConnectionTimeout(), TimeUnit.MILLISECONDS))
+                        .addHandler(new WriteTimeoutHandler(endpointConfiguration.getWriteTimeout(), TimeUnit.MILLISECONDS))
+                );
 
         WebClient client = WebClient.builder()
                 .baseUrl("http://" + hostConfiguration.getHost()+ ":" + hostConfiguration.getPort() + endpointConfiguration.getUrl())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .clientConnector(new ReactorClientHttpConnector(HttpClient.create().resolver(DefaultAddressResolverGroup.INSTANCE)))
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
         return client.get()
                 .uri(uriBuilder -> uriBuilder.build(code))

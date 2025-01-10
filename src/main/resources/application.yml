@@ -38,6 +38,6 @@ http-connector:
       endpoints:
         get-city:
           url: "/api/flights/catalog/city/{code}"
-          readTimeout: 1000
-          writeTimeout: 1000
-          connectionTimeout: 1000
+          readTimeout: 2000
+          writeTimeout: 2000
+          connectionTimeout: 2000
