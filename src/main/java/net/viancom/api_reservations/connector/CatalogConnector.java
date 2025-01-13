@@ -1,5 +1,6 @@
 package net.viancom.api_reservations.connector;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -8,6 +9,8 @@ import net.viancom.api_reservations.connector.configuration.EndpointConfiguratio
 import net.viancom.api_reservations.connector.configuration.HostConfiguration;
 import net.viancom.api_reservations.connector.configuration.HttpConnectorConfiguration;
 import net.viancom.api_reservations.connector.response.CityDTO;
+import net.viancom.api_reservations.enums.APIError;
+import net.viancom.api_reservations.exception.EdteamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,7 +33,7 @@ public class CatalogConnector {
         this.configuration = configuration;
     }
 
-    @CircuitBreaker(name = "api-catalog")
+    @CircuitBreaker(name = "api-catalog", fallbackMethod = "fallbackGetCity")
     public CityDTO getCity(String code){
 
         System.out.println("Calling to api-catalog");
@@ -58,4 +61,18 @@ public class CatalogConnector {
                 .share()
                 .block();
     }
+
+
+    public CityDTO fallbackGetCity(String code, CallNotPermittedException e){
+        System.out.println("Calling fallbackGetCity-1");
+
+        return new CityDTO();
+
+    }
+
+    public CityDTO fallbackGetCity(String code, Exception e){
+        System.out.println("Calling fallbackGetCity-2");
+        throw  new EdteamException(APIError.VALIDATION_ERROR);
+    }
+
 }

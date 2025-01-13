@@ -1,8 +1,12 @@
 package net.viancom.api_reservations.controller;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import net.viancom.api_reservations.dto.ReservationDTO;
+import net.viancom.api_reservations.enums.APIError;
+import net.viancom.api_reservations.exception.EdteamException;
 import net.viancom.api_reservations.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +41,7 @@ public class ReservationController {
     }
 
     @PostMapping
+    @RateLimiter(name="post-reservation", fallbackMethod = "fallbackPost")
     public ResponseEntity<ReservationDTO> save(@RequestBody @Valid ReservationDTO reservation) {
         ReservationDTO response = service.save(reservation);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -53,6 +58,13 @@ public class ReservationController {
     public ResponseEntity<Void> delete(@Min(1) @PathVariable Long id) {
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    //@RateLimiter(name="post-reservation", fallbackMethod = "fallbackPost")
+    public ResponseEntity<ReservationDTO> fallbackPost(@RequestBody @Valid ReservationDTO reservation, RequestNotPermitted e) {
+        System.out.println("calling to fallbackpost");
+        throw new EdteamException(APIError.EXCEED_NUMBER_REQUEST);
 
     }
 }
