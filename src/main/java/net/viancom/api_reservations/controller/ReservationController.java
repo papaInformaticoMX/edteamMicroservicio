@@ -4,6 +4,7 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import net.viancom.api_reservations.controller.resource.ReservationResource;
 import net.viancom.api_reservations.dto.ReservationDTO;
 import net.viancom.api_reservations.enums.APIError;
 import net.viancom.api_reservations.exception.EdteamException;
@@ -19,7 +20,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/reservation")
-public class ReservationController {
+public class ReservationController implements ReservationResource {
     private final ReservationService service;
 
     @Autowired
